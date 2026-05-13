@@ -9,6 +9,15 @@ function isValidStatus(status) {
   return allowedStatuses.includes(status);
 }
 
+function getTaskById(id) {
+  return new Promise((resolve, reject) => {
+    db.get("SELECT * FROM tasks WHERE id = ?", [id], (error, row) => {
+      if (error) reject(error);
+      else resolve(row);
+    });
+  });
+}
+
 router.post("/", (req, res, next) => {
   const { title, description = null, status = "pending" } = req.body;
 
@@ -27,16 +36,20 @@ router.post("/", (req, res, next) => {
     VALUES (?, ?, ?)
   `;
 
-  db.run(sql, [title.trim(), description, status], function (error) {
-    if (error) return next(error);
+  db.run(
+    sql,
+    [title.trim(), description, status],
+    async function onInsert(error) {
+      if (error) return next(error);
 
-    return res.status(201).json({
-      id: this.lastID,
-      title: title.trim(),
-      description,
-      status,
-    });
-  });
+      try {
+        const task = await getTaskById(this.lastID);
+        return res.status(201).json(task);
+      } catch (lookupError) {
+        return next(lookupError);
+      }
+    },
+  );
 });
 
 router.get("/", (req, res, next) => {
