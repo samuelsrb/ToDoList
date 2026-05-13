@@ -34,4 +34,16 @@ router.get('/', (req, res, next) => {
   });
 });
 
+router.get('/:id', (req, res, next) => {
+  db.get('SELECT * FROM tasks WHERE id = ?', [req.params.id], (error, row) => {
+    if (error) return next(error);
+
+    if (!row) {
+      return res.status(404).json({ error: 'Tarefa não encontrada.' });
+    }
+
+    return res.json(row);
+  });
+});
+
 module.exports = router;
