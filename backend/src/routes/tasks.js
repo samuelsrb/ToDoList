@@ -75,4 +75,16 @@ router.put('/:id', (req, res, next) => {
   });
 });
 
+router.delete('/:id', (req, res, next) => {
+  db.run('DELETE FROM tasks WHERE id = ?', [req.params.id], function (error) {
+    if (error) return next(error);
+
+    if (this.changes === 0) {
+      return res.status(404).json({ error: 'Tarefa não encontrada.' });
+    }
+
+    return res.status(204).send();
+  });
+});
+
 module.exports = router;
