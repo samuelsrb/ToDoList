@@ -46,4 +46,33 @@ router.get('/:id', (req, res, next) => {
   });
 });
 
+router.put('/:id', (req, res, next) => {
+  const { title, description = null, status = 'pending' } = req.body;
+
+  if (!title || !title.trim()) {
+    return res.status(400).json({ error: 'O campo title é obrigatório.' });
+  }
+
+  const sql = `
+    UPDATE tasks
+    SET title = ?, description = ?, status = ?
+    WHERE id = ?
+  `;
+
+  db.run(sql, [title.trim(), description, status, req.params.id], function (error) {
+    if (error) return next(error);
+
+    if (this.changes === 0) {
+      return res.status(404).json({ error: 'Tarefa não encontrada.' });
+    }
+
+    return res.json({
+      id: Number(req.params.id),
+      title: title.trim(),
+      description,
+      status,
+    });
+  });
+});
+
 module.exports = router;
