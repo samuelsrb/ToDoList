@@ -8,8 +8,19 @@ const db = new sqlite3.Database(databasePath, (error) => {
     console.error('Erro ao conectar ao SQLite:', error.message);
     process.exit(1);
   }
+});
 
-  console.log('Banco SQLite conectado.');
+db.serialize(() => {
+  db.run(`
+    CREATE TABLE IF NOT EXISTS tasks (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      title TEXT NOT NULL,
+      description TEXT,
+      status TEXT NOT NULL DEFAULT 'pending' CHECK(status IN ('pending', 'completed')),
+      created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+      updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
+    )
+  `);
 });
 
 module.exports = db;
