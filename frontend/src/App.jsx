@@ -4,6 +4,8 @@ const API_URL = "http://localhost:3333/tasks";
 
 function App() {
   const [tasks, setTasks] = useState([]);
+  const [title, setTitle] = useState("");
+  const [description, setDescription] = useState("");
 
   async function loadTasks() {
     try {
@@ -20,9 +22,52 @@ function App() {
     loadTasks();
   }, []);
 
+  async function handleSubmit(event) {
+    event.preventDefault();
+
+    if (!title.trim()) return;
+
+    try {
+      await fetch(API_URL, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          title,
+          description,
+        }),
+      });
+
+      setTitle("");
+      setDescription("");
+
+      loadTasks();
+    } catch (error) {
+      console.error("Erro ao criar tarefa:", error);
+    }
+  }
+
   return (
     <div>
       <h1>To-Do List</h1>
+
+      <form onSubmit={handleSubmit}>
+        <input
+          type="text"
+          placeholder="Título da tarefa"
+          value={title}
+          onChange={(event) => setTitle(event.target.value)}
+        />
+
+        <textarea
+          placeholder="Descrição"
+          value={description}
+          onChange={(event) => setDescription(event.target.value)}
+        />
+
+        <button type="submit">Criar tarefa</button>
+      </form>
 
       <p>{tasks.length} tarefa(s)</p>
 
