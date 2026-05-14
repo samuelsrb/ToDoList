@@ -6,6 +6,7 @@ function App() {
   const [tasks, setTasks] = useState([]);
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
+  const [editingTask, setEditingTask] = useState(null);
 
   async function loadTasks() {
     try {
@@ -28,8 +29,8 @@ function App() {
     if (!title.trim()) return;
 
     try {
-      await fetch(API_URL, {
-        method: "POST",
+      await fetch(editingTask ? `${API_URL}/${editingTask.id}` : API_URL, {
+        method: editingTask ? "PATCH" : "POST",
         headers: {
           "Content-Type": "application/json",
         },
@@ -41,6 +42,7 @@ function App() {
 
       setTitle("");
       setDescription("");
+      setEditingTask(null);
 
       loadTasks();
     } catch (error) {
@@ -84,6 +86,12 @@ function App() {
     }
   }
 
+  function startEditing(task) {
+    setEditingTask(task);
+    setTitle(task.title);
+    setDescription(task.description || "");
+  }
+
   return (
     <div>
       <h1>To-Do List</h1>
@@ -102,7 +110,9 @@ function App() {
           onChange={(event) => setDescription(event.target.value)}
         />
 
-        <button type="submit">Criar tarefa</button>
+        <button type="submit">
+          {editingTask ? "Salvar edição" : "Criar tarefa"}
+        </button>
       </form>
 
       <p>{tasks.length} tarefa(s)</p>
@@ -125,6 +135,8 @@ function App() {
                     ? "Marcar como pendente"
                     : "Concluir"}
                 </button>
+
+                <button onClick={() => startEditing(task)}>Editar</button>
 
                 <button onClick={() => deleteTask(task.id)}>Excluir</button>
               </div>
