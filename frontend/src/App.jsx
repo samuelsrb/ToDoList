@@ -48,6 +48,26 @@ function App() {
     }
   }
 
+  async function toggleStatus(task) {
+    const nextStatus = task.status === "completed" ? "pending" : "completed";
+
+    try {
+      await fetch(`${API_URL}/${task.id}`, {
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          status: nextStatus,
+        }),
+      });
+
+      loadTasks();
+    } catch (error) {
+      console.error("Erro ao atualizar status:", error);
+    }
+  }
+
   return (
     <div>
       <h1>To-Do List</h1>
@@ -81,7 +101,15 @@ function App() {
 
               {task.description && <p>{task.description}</p>}
 
-              <span>Status: {task.status}</span>
+              <div>
+                <span>Status: {task.status}</span>
+
+                <button onClick={() => toggleStatus(task)}>
+                  {task.status === "completed"
+                    ? "Marcar como pendente"
+                    : "Concluir"}
+                </button>
+              </div>
             </li>
           ))}
         </ul>
