@@ -75,38 +75,66 @@ router.get("/:id", (req, res, next) => {
   });
 });
 
-router.put("/:id", (req, res, next) => {
-  const { title, description = null, status = "pending" } = req.body;
+async function updateTask(req, res, next) {
+  const { title, description, status } = req.body;
+  const fields = [];
+  const values = [];
 
-  if (!title || !title.trim()) {
-    return res.status(400).json({ error: "O campo title é obrigatório." });
+  if (title !== undefined) {
+    if (!title || !title.trim()) {
+      return res.status(400).json({ error: "O campo title não pode ser vazio." });
+    }
+
+    fields.push("title = ?");
+    values.push(title.trim());
   }
 
-  const sql = `
-    UPDATE tasks
-    SET title = ?, description = ?, status = ?
-    WHERE id = ?
-  `;
+  if (description !== undefined) {
+    fields.push("description = ?");
+    values.push(description);
+  }
 
-  db.run(
-    sql,
-    [title.trim(), description, status, req.params.id],
-    function (error) {
+  if (status !== undefined) {
+    if (!isValidStatus(status)) {
+      return res
+        .status(400)
+        .json({ error: "O campo status deve ser pending ou completed." });
+    }
+
+    fields.push("status = ?");
+    values.push(status);
+  }
+
+  if (fields.length === 0) {
+    return res.status(400).json({ error: "Informe ao menos um campo para atualizar." });
+  }
+
+  try {
+    const existingTask = await getTaskById(req.params.id);
+
+    if (!existingTask) {
+      return res.status(404).json({ error: "Tarefa não encontrada." });
+    }
+
+    fields.push("updated_at = CURRENT_TIMESTAMP");
+    values.push(req.params.id);
+
+    db.run(`UPDATE tasks SET ${fields.join(", ")} WHERE id = ?`, values, async (error) => {
       if (error) return next(error);
 
-      if (this.changes === 0) {
-        return res.status(404).json({ error: "Tarefa não encontrada." });
+      try {
+        const updatedTask = await getTaskById(req.params.id);
+        return res.json(updatedTask);
+      } catch (lookupError) {
+        return next(lookupError);
       }
+    });
+  } catch (error) {
+    return next(error);
+  }
+}
 
-      return res.json({
-        id: Number(req.params.id),
-        title: title.trim(),
-        description,
-        status,
-      });
-    },
-  );
-});
+router.put("/:id", updateTask);
 
 router.delete("/:id", (req, res, next) => {
   db.run("DELETE FROM tasks WHERE id = ?", [req.params.id], function (error) {
