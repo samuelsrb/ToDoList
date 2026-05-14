@@ -2,10 +2,14 @@ import React, { useEffect, useState } from "react";
 
 const API_URL = "http://localhost:3333/tasks";
 
+const emptyForm = {
+  title: "",
+  description: "",
+};
+
 function App() {
   const [tasks, setTasks] = useState([]);
-  const [title, setTitle] = useState("");
-  const [description, setDescription] = useState("");
+  const [form, setForm] = useState(emptyForm);
   const [editingTask, setEditingTask] = useState(null);
 
   async function loadTasks() {
@@ -23,10 +27,19 @@ function App() {
     loadTasks();
   }, []);
 
+  function handleChange(event) {
+    const { name, value } = event.target;
+
+    setForm((currentForm) => ({
+      ...currentForm,
+      [name]: value,
+    }));
+  }
+
   async function handleSubmit(event) {
     event.preventDefault();
 
-    if (!title.trim()) return;
+    if (!form.title.trim()) return;
 
     try {
       await fetch(editingTask ? `${API_URL}/${editingTask.id}` : API_URL, {
@@ -34,14 +47,10 @@ function App() {
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({
-          title,
-          description,
-        }),
+        body: JSON.stringify(form),
       });
 
-      setTitle("");
-      setDescription("");
+      setForm(emptyForm);
       setEditingTask(null);
 
       loadTasks();
@@ -88,8 +97,10 @@ function App() {
 
   function startEditing(task) {
     setEditingTask(task);
-    setTitle(task.title);
-    setDescription(task.description || "");
+    setForm({
+      title: task.title,
+      description: task.description || "",
+    });
   }
 
   return (
@@ -100,14 +111,16 @@ function App() {
         <input
           type="text"
           placeholder="Título da tarefa"
-          value={title}
-          onChange={(event) => setTitle(event.target.value)}
+          name="title"
+          value={form.title}
+          onChange={handleChange}
         />
 
         <textarea
           placeholder="Descrição"
-          value={description}
-          onChange={(event) => setDescription(event.target.value)}
+          name="description"
+          value={form.description}
+          onChange={handleChange}
         />
 
         <button type="submit">
