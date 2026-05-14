@@ -135,6 +135,7 @@ async function updateTask(req, res, next) {
 }
 
 router.put("/:id", updateTask);
+router.patch("/:id", updateTask);
 
 router.delete("/:id", (req, res, next) => {
   db.run("DELETE FROM tasks WHERE id = ?", [req.params.id], function (error) {
