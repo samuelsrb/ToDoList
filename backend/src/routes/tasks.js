@@ -82,7 +82,9 @@ async function updateTask(req, res, next) {
 
   if (title !== undefined) {
     if (!title || !title.trim()) {
-      return res.status(400).json({ error: "O campo title não pode ser vazio." });
+      return res
+        .status(400)
+        .json({ error: "O campo title não pode ser vazio." });
     }
 
     fields.push("title = ?");
@@ -106,7 +108,9 @@ async function updateTask(req, res, next) {
   }
 
   if (fields.length === 0) {
-    return res.status(400).json({ error: "Informe ao menos um campo para atualizar." });
+    return res
+      .status(400)
+      .json({ error: "Informe ao menos um campo para atualizar." });
   }
 
   try {
@@ -119,16 +123,20 @@ async function updateTask(req, res, next) {
     fields.push("updated_at = CURRENT_TIMESTAMP");
     values.push(req.params.id);
 
-    db.run(`UPDATE tasks SET ${fields.join(", ")} WHERE id = ?`, values, async (error) => {
-      if (error) return next(error);
+    db.run(
+      `UPDATE tasks SET ${fields.join(", ")} WHERE id = ?`,
+      values,
+      async (error) => {
+        if (error) return next(error);
 
-      try {
-        const updatedTask = await getTaskById(req.params.id);
-        return res.json(updatedTask);
-      } catch (lookupError) {
-        return next(lookupError);
-      }
-    });
+        try {
+          const updatedTask = await getTaskById(req.params.id);
+          return res.json(updatedTask);
+        } catch (lookupError) {
+          return next(lookupError);
+        }
+      },
+    );
   } catch (error) {
     return next(error);
   }
