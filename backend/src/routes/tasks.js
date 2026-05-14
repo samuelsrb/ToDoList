@@ -137,16 +137,22 @@ async function updateTask(req, res, next) {
 router.put("/:id", updateTask);
 router.patch("/:id", updateTask);
 
-router.delete("/:id", (req, res, next) => {
-  db.run("DELETE FROM tasks WHERE id = ?", [req.params.id], function (error) {
-    if (error) return next(error);
+router.delete("/:id", async (req, res, next) => {
+  try {
+    const existingTask = await getTaskById(req.params.id);
 
-    if (this.changes === 0) {
+    if (!existingTask) {
       return res.status(404).json({ error: "Tarefa não encontrada." });
     }
 
-    return res.status(204).send();
-  });
+    db.run("DELETE FROM tasks WHERE id = ?", [req.params.id], (error) => {
+      if (error) return next(error);
+
+      return res.status(204).send();
+    });
+  } catch (error) {
+    return next(error);
+  }
 });
 
 module.exports = router;
