@@ -68,6 +68,22 @@ function App() {
     }
   }
 
+  async function deleteTask(taskId) {
+    const shouldDelete = window.confirm("Deseja excluir esta tarefa?");
+
+    if (!shouldDelete) return;
+
+    try {
+      await fetch(`${API_URL}/${taskId}`, {
+        method: "DELETE",
+      });
+
+      loadTasks();
+    } catch (error) {
+      console.error("Erro ao excluir tarefa:", error);
+    }
+  }
+
   return (
     <div>
       <h1>To-Do List</h1>
@@ -109,6 +125,8 @@ function App() {
                     ? "Marcar como pendente"
                     : "Concluir"}
                 </button>
+
+                <button onClick={() => deleteTask(task.id)}>Excluir</button>
               </div>
             </li>
           ))}
