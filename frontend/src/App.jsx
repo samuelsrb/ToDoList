@@ -11,15 +11,23 @@ function App() {
   const [tasks, setTasks] = useState([]);
   const [form, setForm] = useState(emptyForm);
   const [editingTask, setEditingTask] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
+  const [error, setError] = useState("");
 
   async function loadTasks() {
     try {
+      setLoading(true);
+      setError("");
+
       const response = await fetch(API_URL);
       const data = await response.json();
 
       setTasks(data);
     } catch (error) {
-      console.error("Erro ao carregar tarefas:", error);
+      setError("Erro ao carregar tarefas.");
+    } finally {
+      setLoading(false);
     }
   }
 
@@ -42,6 +50,9 @@ function App() {
     if (!form.title.trim()) return;
 
     try {
+      setSaving(true);
+      setError("");
+
       await fetch(editingTask ? `${API_URL}/${editingTask.id}` : API_URL, {
         method: editingTask ? "PATCH" : "POST",
         headers: {
@@ -55,7 +66,9 @@ function App() {
 
       loadTasks();
     } catch (error) {
-      console.error("Erro ao criar tarefa:", error);
+      setError("Erro ao salvar tarefa.");
+    } finally {
+      setSaving(false);
     }
   }
 
@@ -123,14 +136,22 @@ function App() {
           onChange={handleChange}
         />
 
-        <button type="submit">
-          {editingTask ? "Salvar edição" : "Criar tarefa"}
+        <button type="submit" disabled={saving}>
+          {saving
+            ? "Salvando..."
+            : editingTask
+              ? "Salvar edição"
+              : "Criar tarefa"}
         </button>
       </form>
 
+      {error && <p>{error}</p>}
+
       <p>{tasks.length} tarefa(s)</p>
 
-      {tasks.length === 0 ? (
+      {loading ? (
+        <p>Carregando tarefas...</p>
+      ) : tasks.length === 0 ? (
         <p>Nenhuma tarefa cadastrada.</p>
       ) : (
         <ul>
