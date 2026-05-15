@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
+import axios from "axios";
 
-const API_URL = "http://localhost:3333/tasks";
+const API_URL = "http://localhost:3000/tasks";
 
 const emptyForm = {
   title: "",
@@ -20,10 +21,9 @@ function App() {
       setLoading(true);
       setError("");
 
-      const response = await fetch(API_URL);
-      const data = await response.json();
+      const response = await axios.get(API_URL);
 
-      setTasks(data);
+      setTasks(response.data);
     } catch (error) {
       setError("Erro ao carregar tarefas.");
     } finally {
@@ -53,13 +53,14 @@ function App() {
       setSaving(true);
       setError("");
 
-      await fetch(editingTask ? `${API_URL}/${editingTask.id}` : API_URL, {
-        method: editingTask ? "PATCH" : "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(form),
-      });
+      if (editingTask) {
+        await axios.patch(`${API_URL}/${editingTask.id}`, form);
+      } else {
+        await axios.post(API_URL, {
+          ...form,
+          status: "pending",
+        });
+      }
 
       setForm(emptyForm);
       setEditingTask(null);
@@ -76,14 +77,8 @@ function App() {
     const nextStatus = task.status === "completed" ? "pending" : "completed";
 
     try {
-      await fetch(`${API_URL}/${task.id}`, {
-        method: "PATCH",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          status: nextStatus,
-        }),
+      await axios.patch(`${API_URL}/${task.id}`, {
+        status: nextStatus,
       });
 
       loadTasks();
@@ -98,9 +93,7 @@ function App() {
     if (!shouldDelete) return;
 
     try {
-      await fetch(`${API_URL}/${taskId}`, {
-        method: "DELETE",
-      });
+      await axios.delete(`${API_URL}/${taskId}`);
 
       loadTasks();
     } catch (error) {
