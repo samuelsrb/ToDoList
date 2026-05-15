@@ -1,11 +1,63 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>To-Do List</title>
-</head>
-<body>
-  <h1>To-do List</h1>
-</body>
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>To-Do List API</title>
+    <link rel="stylesheet" href="./styles/style.css" />
+    <link rel="stylesheet" href="./styles/tasks.css" />
+  </head>
+
+  <body>
+    <header class="navbar">
+      <strong class="logo">todo<span>api</span></strong>
+
+      <nav>
+        <a href="http://localhost:3000" target="_blank">Acessar backend</a>
+      </nav>
+    </header>
+
+    <main class="hero">
+      <section class="hero-content">
+        <span class="badge">Bem vindo!</span>
+
+        <h1>Gerencie suas tarefas</h1>
+
+        <p>
+          Projeto de To-Do List com backend em Node.js, Express, SQLite e
+          frontend em HTML, CSS e JavaScript.
+        </p>
+
+        <form class="task-form">
+          <input type="text" placeholder="Título da tarefa" />
+
+          <textarea placeholder="Descrição da tarefa"></textarea>
+
+          <button type="submit" class="primary-button">Criar tarefa</button>
+        </form>
+      </section>
+    </main>
+
+    <section id="tasks" class="container">
+      <h2>Minhas tarefas</h2>
+
+      <!-- <div class="tasks">
+        <article class="task-card">
+          <div>
+            <h3>Finalizar mini API</h3>
+
+            <p>Implementar CRUD completo com Node.js, Express e SQLite.</p>
+
+            <span class="status pending">Pendente</span>
+          </div>
+
+          <div class="task-actions">
+            <button>Concluir</button>
+            <button>Editar</button>
+            <button>Excluir</button>
+          </div>
+        </article>
+      </div> -->
+    </section>
+  </body>
 </html>
