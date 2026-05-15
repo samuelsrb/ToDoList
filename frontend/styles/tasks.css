@@ -72,3 +72,11 @@
     }
   }
 }
+
+.task-card.completed {
+  opacity: 0.65;
+}
+
+.task-card.completed h3 {
+  text-decoration: line-through;
+}
